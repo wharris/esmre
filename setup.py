@@ -26,14 +26,17 @@ module1 = Extension("esm",
                                'src/ac_list.c'])
                     
 setup (name = "esmre",
-       version = '0.1',
+       version = '0.1.1',
        description = 'Regular expression accelerator',
-       long_description = "\n".join("""
+       long_description = " ".join("""
         Modules used to accelerate execution of a large collection of regular
         expressions using the Aho-Corasick algorithms.
        """.strip().split()),
        author = 'Will Harris',
        author_email = 'w.harris@tideway.com',
+       url = 'http://code.google.com/p/esmre/',
+       license = 'GNU LGPL',
+       platforms = ['POSIX'],
        ext_modules = [module1],
        package_dir = {'': 'src'},
        py_modules = ["esmre"])

@@ -1,0 +1,13 @@
+Installing esmre
+================
+
+To install esmre, type the following:
+
+  python setup.py install
+
+This will install the esm and esmre modules in the site-packages for the
+Python interpreter you used to run the command.
+
+You can test the installation by typing the following:
+
+  python test/esm_tests.py && python test/esmre_tests.py

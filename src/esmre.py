@@ -29,6 +29,7 @@ def hints(regex):
     group_level = 0
     in_class = False
     in_backslash = False
+    in_braces = False
     
     for ch in regex:
         if in_backslash:
@@ -59,7 +60,14 @@ def hints(regex):
                 
             else:
                 pass
+        
+        elif in_braces:
+            if ch == "}":
+                in_braces = False
             
+            else:
+                pass
+        
         else:
             if ch in "?*":
                 to_append = ""
@@ -87,6 +95,14 @@ def hints(regex):
                 to_append = ""
                 hints.append("")
                 in_class = True
+            
+            elif ch == "{":
+                if to_append:
+                    hints[-1] += to_append[:-1]
+                
+                to_append = ""
+                hints.append("")
+                in_braces = True
                 
             elif ch == "\\":
                 if to_append:

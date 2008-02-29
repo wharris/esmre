@@ -82,6 +82,10 @@ class HintExtractionTests(unittest.TestCase):
     def testSkipsMetacharactersAfterGroups(self):
         self.checkHints(["Yo ", " and a bottle of rum"],
                         r"Yo (ho )+ and a bottle of rum")
+    
+    def testSkipsRepetionBraces(self):
+        self.checkHints(["A", ", me harties"],
+                        r"Ar{2-10}, me harties")
                         
     def testAlternationCausesEmptyResult(self):
         self.checkHints([], r"rum|grog")

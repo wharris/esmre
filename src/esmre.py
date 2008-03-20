@@ -158,16 +158,18 @@ class Index(object):
             keywords = shortlist(hints(regex))
             
             if not keywords:
-                self.hintless_objects.append(obj)
+                self.hintless_objects.append((regex, obj))
             
             for hint in shortlist(hints(regex)):
-                self.esm.enter(hint.lower(), obj)
+                self.esm.enter(hint.lower(), (regex, obj))
         
         finally:
             self.lock.release()
             
             
     def query(self, string):
+        import re
+        import itertools
         self.lock.acquire()
         try:
             
@@ -178,15 +180,8 @@ class Index(object):
         finally:
             self.lock.release()
         
-        return self.hintless_objects + \
-            [obj for (_, obj) in self.esm.query(string.lower())]
-
-
-class NewIndex(Index):
-    def enter(self, regex, obj):
-        Index.enter(self, regex, (regex, obj))
-        
-    def query(self, string):
-        import re
-        return [obj for (regex, obj) in Index.query(self, string)
-                if re.match(regex, string)]
+        return [
+            obj for (regex, obj) in itertools.chain(
+                self.hintless_objects,
+                (pair for (_, pair) in self.esm.query(string.lower())))
+            if re.search(regex, string)]

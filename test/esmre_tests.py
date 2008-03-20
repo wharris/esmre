@@ -125,31 +125,27 @@ class IndexTests(unittest.TestCase):
     def setUp(self):
         self.index = esmre.Index()
         self.index.enter(r"Major-General\W*$", "savoy opera")
-        self.index.enter(r"\bway\W+haye?\b", "sea shanty")
-        
+        self.index.enter(r"(?i)\bway\W+haye?\b", "sea shanty")
+        self.index.enter(r"(\d+\s)*(paces|yards)", "distance")
+        self.index.enter(r"foo(?!d)", "metasyntactic")
+    
     def testSingleQuery(self):
         self.assertEqual(["savoy opera"], self.index.query(
             "I am the very model of a modern Major-General."))
-            
+    
     def testCannotEnterAfterQuery(self):
         self.index.query("blah")
         self.assertRaises(TypeError, self.index.enter, "foo", "bar")
-            
+    
     def testCaseInsensitive(self):
         self.assertEqual(["sea shanty"], self.index.query(
             "Way, hay up she rises,"))
         self.assertEqual(["sea shanty"], self.index.query(
             "To my way haye, blow the man down,"))
-            
-    def testAlwaysReportsOpjectForHintlessExpressions(self):
-        self.index.enter(r"(\d+\s)*(paces|yards)", "distance")
-        self.assertTrue("distance" in self.index.query("'til morning"))
-
-
-class NewIndexTests(unittest.TestCase):
-    def setUp(self):
-        self.index = esmre.NewIndex()
-        self.index.enter(r"foo(?!d)", "metasyntactic")
+    
+    def testReportsObjectForHintlessExpressions(self):
+        self.assertTrue("distance" in self.index.query("50 yards"))
+        self.assertFalse("distance" in self.index.query("'til morning"))
     
     def testReturnsMatchingObject(self):
         self.assertEqual(["metasyntactic"], self.index.query("foo"))

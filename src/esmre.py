@@ -180,3 +180,13 @@ class Index(object):
         
         return self.hintless_objects + \
             [obj for (_, obj) in self.esm.query(string.lower())]
+
+
+class NewIndex(Index):
+    def enter(self, regex, obj):
+        Index.enter(self, regex, (regex, obj))
+        
+    def query(self, string):
+        import re
+        return [obj for (regex, obj) in Index.query(self, string)
+                if re.match(regex, string)]

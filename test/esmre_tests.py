@@ -19,6 +19,9 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
 # USA
 
+import sys
+import os.path
+sys.path.insert(0, os.path.join(os.path.curdir, '../src'))
 import unittest
 import esmre
 
@@ -141,7 +144,19 @@ class IndexTests(unittest.TestCase):
     def testAlwaysReportsOpjectForHintlessExpressions(self):
         self.index.enter(r"(\d+\s)*(paces|yards)", "distance")
         self.assertTrue("distance" in self.index.query("'til morning"))
-        
-        
+
+
+class NewIndexTests(unittest.TestCase):
+    def setUp(self):
+        self.index = esmre.NewIndex()
+        self.index.enter(r"foo(?!d)", "metasyntactic")
+    
+    def testReturnsMatchingObject(self):
+        self.assertEqual(["metasyntactic"], self.index.query("foo"))
+    
+    def testDoesNotReturnNonMatchingObjectWithCorrectHint(self):
+        self.assertEqual([], self.index.query("food"))
+
+
 if __name__ == '__main__':
     unittest.main()

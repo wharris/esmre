@@ -1,6 +1,7 @@
 include AUTHORS
 include COPYING
 include INSTALL
+include MANIFEST.in
 include src/ac_heap.h
 include src/ac_list.h
 include src/ac_types.h

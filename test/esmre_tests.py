@@ -19,9 +19,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
 # USA
 
-import sys
-import os.path
-sys.path.insert(0, os.path.join(os.path.curdir, '../src'))
 import unittest
 import esmre
 
@@ -125,34 +122,26 @@ class IndexTests(unittest.TestCase):
     def setUp(self):
         self.index = esmre.Index()
         self.index.enter(r"Major-General\W*$", "savoy opera")
-        self.index.enter(r"(?i)\bway\W+haye?\b", "sea shanty")
-        self.index.enter(r"(\d+\s)*(paces|yards)", "distance")
-        self.index.enter(r"foo(?!d)", "metasyntactic")
-    
+        self.index.enter(r"\bway\W+haye?\b", "sea shanty")
+        
     def testSingleQuery(self):
         self.assertEqual(["savoy opera"], self.index.query(
             "I am the very model of a modern Major-General."))
-    
+            
     def testCannotEnterAfterQuery(self):
         self.index.query("blah")
         self.assertRaises(TypeError, self.index.enter, "foo", "bar")
-    
+            
     def testCaseInsensitive(self):
         self.assertEqual(["sea shanty"], self.index.query(
             "Way, hay up she rises,"))
         self.assertEqual(["sea shanty"], self.index.query(
             "To my way haye, blow the man down,"))
-    
-    def testReportsObjectForHintlessExpressions(self):
-        self.assertTrue("distance" in self.index.query("50 yards"))
-        self.assertFalse("distance" in self.index.query("'til morning"))
-    
-    def testReturnsMatchingObject(self):
-        self.assertEqual(["metasyntactic"], self.index.query("foo"))
-    
-    def testDoesNotReturnNonMatchingObjectWithCorrectHint(self):
-        self.assertEqual([], self.index.query("food"))
-
-
+            
+    def testAlwaysReportsOpjectForHintlessExpressions(self):
+        self.index.enter(r"(\d+\s)*(paces|yards)", "distance")
+        self.assertTrue("distance" in self.index.query("'til morning"))
+        
+        
 if __name__ == '__main__':
     unittest.main()

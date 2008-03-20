@@ -21,8 +21,6 @@
 
 import esm
 import threading
-import re
-import itertools
 
 def hints(regex):
     hints = [""]
@@ -142,19 +140,6 @@ def shortlist(hints):
     return [best]
 
 
-def memomatcher(regex):
-    def match(string):
-        return match._match(string)
-        
-    def _match(string):
-        match._match = re.compile(regex).search
-        return match._match(string)
-        
-    match._match = _match
-    match.regex = regex
-    return match
-
-
 class Index(object):
     def __init__(self):
         self.esm = esm.Index()
@@ -173,10 +158,10 @@ class Index(object):
             keywords = shortlist(hints(regex))
             
             if not keywords:
-                self.hintless_objects.append((memomatcher(regex), obj))
+                self.hintless_objects.append(obj)
             
             for hint in shortlist(hints(regex)):
-                self.esm.enter(hint.lower(), (memomatcher(regex), obj))
+                self.esm.enter(hint.lower(), obj)
         
         finally:
             self.lock.release()
@@ -193,7 +178,5 @@ class Index(object):
         finally:
             self.lock.release()
         
-        return [obj for (matcher, obj) in itertools.chain(
-                    self.hintless_objects,
-                    (pair for (_, pair) in self.esm.query(string.lower())))
-                if matcher(string)]
+        return self.hintless_objects + \
+            [obj for (_, obj) in self.esm.query(string.lower())]

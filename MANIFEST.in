@@ -1,3 +1,7 @@
 include AUTHORS
 include COPYING
 include INSTALL
+include src/ac_heap.h
+include src/ac_list.h
+include src/ac_types.h
+include src/aho_corasick.h

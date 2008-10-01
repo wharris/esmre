@@ -26,7 +26,7 @@ module1 = Extension("esm",
                                'src/ac_list.c'])
                     
 setup (name = "esmre",
-       version = '0.2.1',
+       version = '0.3.0',
        description = 'Regular expression accelerator',
        long_description = " ".join("""
         Modules used to accelerate execution of a large collection of regular

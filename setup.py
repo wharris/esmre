@@ -16,7 +16,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
 # USA
 
-from distutils.core import setup, Extension
+from setuptools import setup, Extension
 
 module1 = Extension("esm",
                     #define_macros=[("HEAP_CHECK", 1)],
@@ -32,6 +32,18 @@ setup (name = "esmre",
         Modules used to accelerate execution of a large collection of regular
         expressions using the Aho-Corasick algorithms.
        """.strip().split()),
+       classifiers = [
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved ::',
+            'GNU Library or Lesser General Public License (LGPL)',
+        'Operating System :: POSIX',
+        'Programming Language :: C',
+        'Programming Language :: Python',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+        'Topic :: Text Processing :: Indexing'
+       ],
+       install_requires=['setuptools'],
        author = 'Will Harris',
        author_email = 'w.harris@tideway.com',
        url = 'http://code.google.com/p/esmre/',

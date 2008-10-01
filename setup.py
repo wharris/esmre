@@ -35,7 +35,7 @@ setup (name = "esmre",
        classifiers = [
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
-        'License :: OSI Approved ::'
+        'License :: OSI Approved :: '
             'GNU Library or Lesser General Public License (LGPL)',
         'Operating System :: POSIX',
         'Programming Language :: C',

@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 # esmre_tests.py - tests for esmre module
-# Copyright (C) 2007 Tideway Systems Limited.
+# Copyright (C) 2007-2008 Tideway Systems Limited.
 # 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -24,51 +24,51 @@ import esmre
 
 class HintExtractionTests(unittest.TestCase):
     def checkHints(self, expected_hints, regex):
-        self.assertEqual(expected_hints, esmre.hints(regex))
+        self.assertEqual(set(expected_hints), set(esmre.hints(regex)))
         
     def testSimpleString(self):
-        self.checkHints(["yarr"], "yarr")
+        self.checkHints(["yarr"], r"yarr")
     
     def testSkipsOptionalCharacter(self):
-        self.checkHints(["dubloon"], "dubloons?")
+        self.checkHints(["dubloon"], r"dubloons?")
         
     def testStartsNewStringAfterOptionalCharacter(self):
-        self.checkHints(["ship", "shape"], "ship ?shape")
+        self.checkHints(["ship", "shape"], r"ship ?shape")
         
     def testSkipsOptionalRepeatedCharacter(self):
-        self.checkHints(["bristol", "fasion"], "bristol *fasion")
+        self.checkHints(["bristol", "fasion"], r"bristol *fasion")
         
     def testIncludesRepeatedCharacterButStartsNewHint(self):
         self.checkHints(["ava", "st me harties"],
-                         "ava+st me harties")
+                         r"ava+st me harties")
     
-    def testSkipsGroups(self):
+    def testSkipsGroupsWithAlternation(self):
         self.checkHints(["Hoist the ", ", ye ", "!"],
-             "Hoist the (mizzen mast|main brace), "
-                       "ye (landlubbers|scurvy dogs)!")
+             r"Hoist the (mizzen mast|main brace), "
+                       r"ye (landlubbers|scurvy dogs)!")
                        
     def testSkipsAny(self):
         self.checkHints(["After 10 paces, ", " marks the spot"],
-                         "After 10 paces, . marks the spot")
+                         r"After 10 paces, . marks the spot")
                        
     def testSkipsOneOrMoreAny(self):
         self.checkHints(["Hard to ", "!"],
-                         "Hard to .+!")
+                         r"Hard to .+!")
                          
     def testSkipsNestedGroups(self):
-        self.checkHints(["Squark!"],
-                         "Squark!( Pieces of (.+)!)")
+        self.checkHints(["Squark!", " Pieces of ", "!"],
+                         r"Squark!( Pieces of (.+)!)")
                          
     def testSkipsCharacterClass(self):
         self.checkHints(["r"],
-                         "[ya]a*r+")
+                         r"[ya]a*r+")
 
     def testRightBracketDoesNotCloseGroupIfInClass(self):
         self.checkHints([":=", "X"],
-                         ":=([)D])X")
+                         r":=([)D])X")
                          
     def testSkipsBackslashMetacharacters(self):
-        self.checkHints(["Cap'n", " "],
+        self.checkHints(["Cap'n", " ", " Beard"],
                          r"Cap'n\b ([\S] Beard)")
                          
     def testBackslashBracketDoesNotCloseGroup(self):
@@ -80,7 +80,7 @@ class HintExtractionTests(unittest.TestCase):
                          r":=[)D\]]X")
                          
     def testSkipsMetacharactersAfterGroups(self):
-        self.checkHints(["Yo ", " and a bottle of rum"],
+        self.checkHints(["Yo ", "ho ", " and a bottle of rum"],
                         r"Yo (ho )+ and a bottle of rum")
     
     def testSkipsRepetionBraces(self):
@@ -91,7 +91,7 @@ class HintExtractionTests(unittest.TestCase):
         self.checkHints([], r"rum|grog")
         
     def testSkipMatchBeginning(self):
-        self.checkHints(["The black perl"], "^The black perl")
+        self.checkHints(["The black perl"], r"^The black perl")
         
     def testSkipMatchEnd(self):
         self.checkHints(["Davey Jones' Locker"], r"Davey Jones' Locker$")
@@ -99,6 +99,48 @@ class HintExtractionTests(unittest.TestCase):
     def testOnlyGroupGivesEmptyResult(self):
         self.checkHints([], r"(rum|grog)")
     
+    def testGetsHintsFromGroups(self):
+        self.checkHints(["/"], r"([0-3][0-9]/[0-1][0-9]/[1-2][0-9]{3})")
+    
+    def testSkipsOptionalGroups(self):
+        self.checkHints(["Shiver me timbers!"],
+                        r"Shiver me timbers!( Arrr!)?")
+    
+    def testSkipsMostExtensionGroups(self):
+        for regex in [
+                # set flag
+                r"(?i)(?L)(?m)(?s)(?u)(?x)",
+                
+                # non-grouping paren 
+                r"(?:foo)",
+                
+                # previous named group
+                r"(?P=foo)",
+                
+                # comment
+                r"(?#foo)",
+                
+                # lookahead
+                r"(?=foo)",
+                
+                # negative lookahead
+                r"(?!foo)",
+                
+                # lookbehind
+                r"(?<=foo)",
+                
+                # negative lookbehind
+                r"(?<!foo)",
+                
+                # conditional match
+                r"(?(1)foo|bar)"]:
+            
+            self.checkHints([], regex)
+    
+    def testGetsHintsFromNamedGroup(self):
+        self.checkHints(
+            ["/"], r"(?P<date>[0-3][0-9]/[0-1][0-9]/[1-2][0-9]{3})")
+
 
 class ShortlistTests(unittest.TestCase):
     def checkShortlist(self, expected_shortlist, hints):

@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 # esmre.py - clue-indexed regular expressions module
-# Copyright (C) 2007 Tideway Systems Limited.
+# Copyright (C) 2007-2008 Tideway Systems Limited.
 # 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -22,109 +22,202 @@
 import esm
 import threading
 
-def hints(regex):
-    hints = [""]
-    to_append = ""
+class InBackslashState(object):
+    def __init__(self, parent_state):
+        self.parent_state = parent_state
     
-    group_level = 0
-    in_class = False
-    in_backslash = False
-    in_braces = False
+    def process_byte(self, ch):
+        return self.parent_state
+
+
+class InClassState(object):
+    def __init__(self, parent_state):
+        self.parent_state = parent_state
     
-    for ch in regex:
-        if in_backslash:
-            in_backslash = False
+    def process_byte(self, ch):
+        if ch == "]":
+            return self.parent_state
             
-        elif in_class:
-            if ch == "]":
-                in_class = False
-                
-            elif ch == "\\":
-                in_backslash = True
-            
-            else:
-                pass
-            
-        elif group_level > 0:
-            if ch == ")":
-                group_level -= 1
-                
-            elif ch == "(":
-                group_level += 1
-                
-            elif ch == "[":
-                in_class = True
-                
-            elif ch == "\\":
-                in_backslash = True
-                
-            else:
-                pass
-        
-        elif in_braces:
-            if ch == "}":
-                in_braces = False
-            
-            else:
-                pass
+        elif ch == "\\":
+            return InBackslashState(self)
         
         else:
-            if ch in "?*":
-                to_append = ""
-                hints.append("")
+            return self
+
+
+class InBracesState(object):
+    def __init__(self, parent_state):
+        self.parent_state = parent_state
+    
+    def process_byte(self, ch):
+        if ch == "}":
+            return self.parent_state
+        
+        else:
+            return self
+
+
+class CollectingState(object):
+    def __init__(self):
+        self.hints = [""]
+
+    def process_byte(self, ch):
+        self.update_hints(ch)
+        return self.next_state(ch)
+    
+    def bank_current_hint_with_last_byte(self):
+        self.hints.append("")
+    
+    def bank_current_hint_and_forget_last_byte(self):
+        if isinstance(self.hints[-1], list):
+            del self.hints[-1]
+        else:
+            self.hints[-1] = self.hints[-1][:-1]
+        
+        self.hints.append("")
+    
+    def forget_all_hints(self):
+        self.hints = [""]
+    
+    def append_to_current_hint(self, ch):
+        self.hints[-1] += ch
+    
+    def update_hints(self, ch):
+        if ch in "?*{":
+            self.bank_current_hint_and_forget_last_byte()
+        
+        elif ch in "+.^$([\\":
+            self.bank_current_hint_with_last_byte()
+        
+        elif ch == "|":
+            self.forget_all_hints()
             
-            elif ch in "+.^$":
-                if to_append:
-                    hints[-1] += to_append
-                
-                to_append = ""
-                hints.append("")
+        else:
+            self.append_to_current_hint(ch)
+    
+    def next_state(self, ch):
+        if ch == "(":
+            return StartOfGroupState(self)
+        
+        elif ch == "[":
+            return InClassState(self)
+        
+        elif ch == "{":
+            return InBracesState(self)
             
-            elif ch == "(":
-                if to_append:
-                    hints[-1] += to_append
-                    
-                to_append = ""
-                hints.append("")
-                group_level += 1
+        elif ch == "\\":
+            return InBackslashState(self)
             
-            elif ch == "[":
-                if to_append:
-                    hints[-1] += to_append
-                
-                to_append = ""
-                hints.append("")
-                in_class = True
+        elif ch == "|":
+            return self.alternation_state()
             
-            elif ch == "{":
-                if to_append:
-                    hints[-1] += to_append[:-1]
-                
-                to_append = ""
-                hints.append("")
-                in_braces = True
-                
-            elif ch == "\\":
-                if to_append:
-                    hints[-1] += to_append
-                
-                to_append = ""
-                hints.append("")
-                in_backslash = True
-                
-            elif ch == "|":
-                return []
-                
+        else:
+            return self
+    
+    def alternation_state(self):
+        raise NotImplementedError
+
+
+class RootState(CollectingState):
+    def alternation_state(self):
+        raise StopIteration
+
+
+class StartOfGroupState(object):
+    def __init__(self, parent_state):
+        self.parent_state = parent_state
+    
+    def process_byte(self, ch):
+        if ch == "?":
+            return StartOfExtensionGroupState(self.parent_state)
+        else:
+            return InGroupState(self.parent_state).process_byte(ch)
+
+
+class InGroupState(CollectingState):
+    def __init__(self, parent_state):
+        CollectingState.__init__(self)
+        self.parent_state = parent_state
+        self.had_alternation = False
+    
+    def update_hints(self, ch):
+        if ch == ")":
+            if not self.had_alternation:
+                self.parent_state.hints.append(self.hints)
+        else:
+            CollectingState.update_hints(self, ch)
+    
+    def next_state(self, ch):
+        if ch == ")":
+            return self.close_group_state()
+        else:
+            return CollectingState.next_state(self, ch)
+    
+    def close_group_state(self):
+        return self.parent_state
+    
+    def alternation_state(self):
+        self.had_alternation = True
+        return self
+
+
+class StartOfExtensionGroupState(object):
+    def __init__(self, parent_state):
+        self.parent_state = parent_state
+    
+    def process_byte(self, ch):
+        if ch == "P":
+            return MaybeStartOfNamedGroupState(self.parent_state)
+        else:
+            return IgnoredGroupState(self.parent_state).process_byte(ch)
+
+
+class MaybeStartOfNamedGroupState(object):
+    def __init__(self, parent_state):
+        self.parent_state = parent_state
+    
+    def process_byte(self, ch):
+        if ch == "<":
+            return InNamedGroupNameState(self.parent_state)
+        else:
+            return IgnoredGroupState(self.parent_state)
+
+
+class InNamedGroupNameState(object):
+    def __init__(self, parent_state):
+        self.parent_state = parent_state
+    
+    def process_byte(self, ch):
+        if ch == ">":
+            return InGroupState(self.parent_state)
+        else:
+            return self
+
+
+class IgnoredGroupState(InGroupState):
+    def update_hints(self, ch):
+        pass
+
+
+def hints(regex):
+    state = RootState()
+    
+    try:
+        for ch in regex:
+            state = state.process_byte(ch)
+        
+    except StopIteration:
+        pass
+            
+    def flattened(l):
+        for item in l:
+            if isinstance(item, list):
+                for i in flattened(item):
+                    yield i
             else:
-                if to_append:
-                    hints[-1] += to_append
-                
-                to_append = ch
-            
-    if to_append:
-        hints[-1] += to_append
-            
-    return [hint for hint in hints if hint]
+                yield item
+    
+    return [hint for hint in flattened(state.hints) if hint]
 
 
 def shortlist(hints):

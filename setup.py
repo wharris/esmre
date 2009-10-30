@@ -20,13 +20,11 @@ from setuptools import setup, Extension
 
 module1 = Extension("esm",
                     #define_macros=[("HEAP_CHECK", 1)],
-                    sources = ['src/esm.c',
-                               'src/aho_corasick.c',
-                               'src/ac_heap.c',
-                               'src/ac_list.c'])
+                    sources = ['src/esm.c'],
+                    libraries = ['esm'])
                     
 setup (name = "esmre",
-       version = '0.3.1',
+       version = '0.5',
        description = 'Regular expression accelerator',
        long_description = " ".join("""
         Modules used to accelerate execution of a large collection of regular

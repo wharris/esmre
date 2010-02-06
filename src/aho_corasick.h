@@ -59,9 +59,6 @@ typedef struct ac_result {
     void*       object;
 } ac_result;
 
-void ac_result_list_free(ac_list*);
-
-
 /**
  * Interface states for an index objects.
  */
@@ -94,14 +91,23 @@ typedef struct ac_index {
     struct ac_state*    state_0;
     
 } ac_index;
- 
+
+/**
+ * Type for result callback function.
+ */
+typedef ac_error_code (*ac_result_callback)(void*, ac_result*);
 
 // Operations for index objects.
 ac_index* ac_index_new(void);
 ac_error_code ac_index_free(ac_index*, ac_list_item_free_function);
 ac_error_code ac_index_enter(ac_index*, ac_symbol*, ac_offset, void*);
 ac_error_code ac_index_fix(ac_index*);
+ac_error_code ac_index_query_cb(ac_index*, ac_symbol*, ac_offset,
+                                ac_result_callback, void*);
+
+// Backwards-compatible operations for index objects.
 ac_error_code ac_index_query(ac_index*, ac_symbol*, ac_offset, ac_list*);
+void ac_result_list_free(ac_list*);
 
 #endif // AHO_CORASICK_H
 

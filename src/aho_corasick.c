@@ -305,25 +305,18 @@ ac_output_list_add_list(ac_list* self, ac_list* other) {
 }
 
 // --------------------------------------------------------------------------
-// Result list
+// Callbacks
 
 /**
- * Free the result list.
- */
-void
-ac_result_list_free(ac_list* self) {
-    (void) ac_list_free(self, ac_list_free_simple_item, NULL);
-}
-
-/**
- * Add a new item to the result list. Returns AC_SUCCESS if successful, or
- * AC_FAILURE if an error was encountered.
+ * Call the callback with an single result. Returns AC_SUCCESS if successful,
+ * or AC_FAILURE if the there was an error was encountered.
  */
 ac_error_code
-ac_result_list_add(ac_list* self,
-                   ac_offset start,
-                   ac_offset end,
-                   void* object) {
+ac_cb_output(ac_result_callback result_cb,
+             void* result_cb_data,
+             ac_offset start,
+             ac_offset end,
+             void* object) {
     
     ac_result* new_item;
     
@@ -334,8 +327,9 @@ ac_result_list_add(ac_list* self,
     new_item->start = start;
     new_item->end = end;
     new_item->object = object;
-
-    if (ac_list_add(self, new_item) != AC_SUCCESS) {
+    
+    // TODO: should we return the callback's error code?
+    if (result_cb(result_cb_data, new_item) != AC_SUCCESS) {
         FREE(new_item);
         return AC_FAILURE;
     }
@@ -344,16 +338,15 @@ ac_result_list_add(ac_list* self,
 }
 
 /**
- * Add results to the result list from the given output list. The end
- * attribute of each ac_result is calculated from the end argument. The start
- * attribute of each ac_result is calculated from the end argument and the
- * offset in an output item. Returns AC_SUCCESS if successful, or AC_FAILURE
- * if an error was encountered.
+ * Send each item in the output list to the callback.
+ * Returns AC_SUCCESS if successful or AC_FAILURE if an error was encountered.
  */
 ac_error_code
-ac_result_list_add_outputs(ac_list* self,
-                           ac_list* outputs,
-                           ac_offset end) {
+ac_cb_outputs(ac_result_callback result_cb,
+              void* result_cb_data,
+              ac_list* outputs,
+              ac_offset end)
+{
     ac_list_item* list_item = NULL;
     ac_output*    item = NULL;
     
@@ -361,10 +354,11 @@ ac_result_list_add_outputs(ac_list* self,
     
     while (list_item) {
         item = (ac_output*) list_item->item;
-        if (ac_result_list_add(self,
-                               end - item->offset + 1,
-                               end + 1,
-                               item->object) != AC_SUCCESS) {
+        if (ac_cb_output(result_cb,
+                         result_cb_data,
+                         end - item->offset + 1,
+                         end + 1,
+                         item->object) != AC_SUCCESS) {
             return AC_FAILURE;
         }
         
@@ -696,17 +690,17 @@ ac_index_fix(ac_index* self) {
 
 /**
  * Query the index with the given phrase of the given size. Matching keyword
- * spans and associated objects are appended as ac_results to the the list in
- * the out argument. This function is an implementation of 'Algorithm 1.
- * Pattern matching machine.' from the paper. Returns AC_SUCCESS if the query
- * was successful (even if there were no matches) or AC_FAILURE if an error
- * was encountered.
+ * spans and associated objects are sent with result_cb_data to result_cb.
+ * This function is an implementation of 'Algorithm 1. Pattern matching 
+ * machine.' from the paper. Returns AC_SUCCESS if the query was successful
+ * (even if there were no matches) or AC_FAILURE if an error was encountered.
  */
-ac_error_code
-ac_index_query(ac_index* self,
-               ac_symbol* phrase,
-               ac_offset size,
-               ac_list* out) {
+ac_error_code ac_index_query_cb(ac_index* self,
+                                ac_symbol* phrase,
+                                ac_offset size,
+                                ac_result_callback result_cb,
+                                void* result_cb_data)
+{
     ac_state* state = self->state_0;
     ac_state* next = NULL;
     ac_offset j = 0;
@@ -716,8 +710,8 @@ ac_index_query(ac_index* self,
         return AC_FAILURE;
     }
     
-    // You must not provide a NULL out argument.
-    if ( ! out) {
+    // You must not provide a NULL callback.
+    if ( ! result_cb) {
         return AC_FAILURE;
     }
     
@@ -737,18 +731,50 @@ ac_index_query(ac_index* self,
         
         // ... Add the outputs for the state. If there is no match, the state
         // will be state_0 which always has no outputs. ...
-        if (ac_result_list_add_outputs(
-                out, state->outputs, j) != AC_SUCCESS) {
+        if (ac_cb_outputs(
+                result_cb, result_cb_data, state->outputs, j) != AC_SUCCESS) {
             return AC_FAILURE;
         };
         
-        if (ac_result_list_add_outputs(
-                out, state->extra_outputs, j) != AC_SUCCESS) {
+        if (ac_cb_outputs(
+                result_cb, result_cb_data, state->extra_outputs, j) != AC_SUCCESS) {
             return AC_FAILURE;
         };
     }
     
     return AC_SUCCESS;
 }
+
+// --------------------------------------------------------------------------
+// Backwards compatibility
+
+/**
+ * Free the result list.
+ */
+void
+ac_result_list_free(ac_list* self) {
+    (void) ac_list_free(self, ac_list_free_simple_item, NULL);
+}
+
+/**
+ * Query the index with the given phrase of the given size. Matching keyword
+ * spans and associated objects are appended as ac_results to the the list in
+ * the out argument. This function is an implementation of 'Algorithm 1.
+ * Pattern matching machine.' from the paper. Returns AC_SUCCESS if the query
+ * was successful (even if there were no matches) or AC_FAILURE if an error
+ * was encountered.
+ */
+ac_error_code
+ac_index_query(ac_index* self,
+               ac_symbol* phrase,
+               ac_offset size,
+               ac_list* out) {
+    return ac_index_query_cb(self,
+                             phrase,
+                             size,
+                             (ac_result_callback) ac_list_add,
+                             (void*) out);
+}
+
 
 // TODO: Add ac_index_unfix method to unfix the index.

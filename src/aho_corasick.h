@@ -99,7 +99,7 @@ typedef ac_error_code (*ac_result_callback)(void*, ac_result*);
 
 // Operations for index objects.
 ac_index* ac_index_new(void);
-ac_error_code ac_index_free(ac_index*, ac_list_item_free_function);
+ac_error_code ac_index_free(ac_index*, ac_free_function);
 ac_error_code ac_index_enter(ac_index*, ac_symbol*, ac_offset, void*);
 ac_error_code ac_index_fix(ac_index*);
 ac_error_code ac_index_query_cb(ac_index*, ac_symbol*, ac_offset,

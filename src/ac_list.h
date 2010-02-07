@@ -42,14 +42,8 @@ typedef struct {
     ac_list_item*   last;
 } ac_list;
 
-/**
- * Type for function pointers passed to ac_list_free used for freeing
- * complex item types.
- */
-typedef ac_error_code (*ac_list_item_free_function)(void*, void*);
-
 ac_list* ac_list_new(void);
-ac_error_code ac_list_free(ac_list*, ac_list_item_free_function, void*);
+ac_error_code ac_list_free(ac_list*, ac_free_function, void*);
 ac_error_code ac_list_add(ac_list*, void*);
 
 /* Simple item freeing methods. */

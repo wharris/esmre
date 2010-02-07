@@ -241,7 +241,7 @@ ac_output_list_free_item(void* item, void* data) {
     ac_output* output = (ac_output*) item;
     ac_error_code result;
     
-    result = ((ac_list_item_free_function) data)(output->object, NULL);
+    result = ((ac_free_function) data)(output->object, NULL);
     // TODO: let user pass data to free function
     FREE(output);
     return result;
@@ -252,7 +252,7 @@ ac_output_list_free_item(void* item, void* data) {
  * each output item.
  */
 void
-ac_output_list_free(ac_list* self, ac_list_item_free_function object_free) {
+ac_output_list_free(ac_list* self, ac_free_function object_free) {
     (void) ac_list_free(self, ac_output_list_free_item, object_free);
 }
 
@@ -411,7 +411,7 @@ ac_state_new(void) {
 ac_error_code
 ac_state_free(ac_state* self,
               ac_list* children,
-              ac_list_item_free_function object_free) {
+              ac_free_function object_free) {
 
     if ( ! self) {
         return AC_FAILURE;
@@ -497,7 +497,7 @@ ac_index_new(void) {
  * Returns AC_SUCCESS if successful of AC_FAILURE is an error was encountered.
  */
 ac_error_code
-ac_index_free(ac_index* self, ac_list_item_free_function object_free) {
+ac_index_free(ac_index* self, ac_free_function object_free) {
 
     ac_list* queue        = NULL;
     ac_state* state       = NULL;

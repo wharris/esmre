@@ -70,7 +70,7 @@ ac_list_free_keep_item(void* item, void* data) {
  */
 ac_error_code
 ac_list_free(ac_list* self,
-             ac_list_item_free_function free_item,
+             ac_free_function free_item,
              void* free_data) {
 
     ac_list_item* list_item = NULL;

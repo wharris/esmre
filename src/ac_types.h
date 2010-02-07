@@ -24,5 +24,10 @@ typedef int  ac_error_code;
 #define AC_SUCCESS 0
 #define AC_FAILURE 1
 
+/**
+ * Type for function pointers used for freeing complex item types.
+ */
+typedef ac_error_code (*ac_free_function)(void* item, void* data);
+
 #endif /* AC_ERROR_CODE_H */
 

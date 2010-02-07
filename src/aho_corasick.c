@@ -45,6 +45,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "aho_corasick.h"
 #include "ac_heap.h"
+#include "ac_list.h"
 #include <stdbool.h>
 
 /**
@@ -241,7 +242,7 @@ ac_output_list_free_item(void* item, void* data) {
     ac_output* output = (ac_output*) item;
     ac_error_code result;
     
-    result = ((ac_list_item_free_function) data)(output->object, NULL);
+    result = ((ac_free_function) data)(output->object, NULL);
     // TODO: let user pass data to free function
     FREE(output);
     return result;
@@ -252,7 +253,7 @@ ac_output_list_free_item(void* item, void* data) {
  * each output item.
  */
 void
-ac_output_list_free(ac_list* self, ac_list_item_free_function object_free) {
+ac_output_list_free(ac_list* self, ac_free_function object_free) {
     (void) ac_list_free(self, ac_output_list_free_item, object_free);
 }
 
@@ -411,7 +412,7 @@ ac_state_new(void) {
 ac_error_code
 ac_state_free(ac_state* self,
               ac_list* children,
-              ac_list_item_free_function object_free) {
+              ac_free_function object_free) {
 
     if ( ! self) {
         return AC_FAILURE;
@@ -497,7 +498,7 @@ ac_index_new(void) {
  * Returns AC_SUCCESS if successful of AC_FAILURE is an error was encountered.
  */
 ac_error_code
-ac_index_free(ac_index* self, ac_list_item_free_function object_free) {
+ac_index_free(ac_index* self, ac_free_function object_free) {
 
     ac_list* queue        = NULL;
     ac_state* state       = NULL;
@@ -744,37 +745,5 @@ ac_error_code ac_index_query_cb(ac_index* self,
     
     return AC_SUCCESS;
 }
-
-// --------------------------------------------------------------------------
-// Backwards compatibility
-
-/**
- * Free the result list.
- */
-void
-ac_result_list_free(ac_list* self) {
-    (void) ac_list_free(self, ac_list_free_simple_item, NULL);
-}
-
-/**
- * Query the index with the given phrase of the given size. Matching keyword
- * spans and associated objects are appended as ac_results to the the list in
- * the out argument. This function is an implementation of 'Algorithm 1.
- * Pattern matching machine.' from the paper. Returns AC_SUCCESS if the query
- * was successful (even if there were no matches) or AC_FAILURE if an error
- * was encountered.
- */
-ac_error_code
-ac_index_query(ac_index* self,
-               ac_symbol* phrase,
-               ac_offset size,
-               ac_list* out) {
-    return ac_index_query_cb(self,
-                             phrase,
-                             size,
-                             (ac_result_callback) ac_list_add,
-                             (void*) out);
-}
-
 
 // TODO: Add ac_index_unfix method to unfix the index.

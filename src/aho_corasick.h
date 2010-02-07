@@ -20,7 +20,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define AHO_CORASICK_H
 
 #include "ac_types.h"
-#include "ac_list.h"
 
 /**
  * Type for symbols used to build strings such as keywords and query phrases.
@@ -99,15 +98,11 @@ typedef ac_error_code (*ac_result_callback)(void*, ac_result*);
 
 // Operations for index objects.
 ac_index* ac_index_new(void);
-ac_error_code ac_index_free(ac_index*, ac_list_item_free_function);
+ac_error_code ac_index_free(ac_index*, ac_free_function);
 ac_error_code ac_index_enter(ac_index*, ac_symbol*, ac_offset, void*);
 ac_error_code ac_index_fix(ac_index*);
 ac_error_code ac_index_query_cb(ac_index*, ac_symbol*, ac_offset,
                                 ac_result_callback, void*);
-
-// Backwards-compatible operations for index objects.
-ac_error_code ac_index_query(ac_index*, ac_symbol*, ac_offset, ac_list*);
-void ac_result_list_free(ac_list*);
 
 #endif // AHO_CORASICK_H
 

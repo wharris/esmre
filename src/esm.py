@@ -34,30 +34,30 @@ libesm.ac_index_fix.argtypes = [ctypes.c_void_p]
 
 libesm.ac_index_free.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
 
-class ac_list_item(ctypes.Structure):
-    pass
-    
-ac_list_item._fields_ = [('item', ctypes.c_void_p),
-                         ('next', ctypes.POINTER(ac_list_item))]
-
-class ac_list(ctypes.Structure):
-    _fields_ = [('first', ctypes.POINTER(ac_list_item)),
-                ('last', ctypes.POINTER(ac_list_item))]
-    
-
-libesm.ac_index_query.argtypes = [ctypes.c_void_p,
-                                  ctypes.c_char_p,
-                                  ctypes.c_uint,
-                                  ctypes.POINTER(ac_list)]
-
-libesm.ac_list_new.restype = ctypes.POINTER(ac_list)
-
-libesm.ac_result_list_free.arg_types = [ctypes.POINTER(ac_list)]
-
 class ac_result(ctypes.Structure):
     _fields_ = [('start', ctypes.c_int),
                 ('end', ctypes.c_int),
                 ('object', ctypes.c_void_p)]
+
+libesm.ac_result_callback = ctypes.CFUNCTYPE(ctypes.c_int,
+                                             ctypes.c_void_p,
+                                             ctypes.POINTER(ac_result))
+
+libesm.ac_index_query_cb.argtypes = [ctypes.c_void_p,
+                                     ctypes.c_char_p,
+                                     ctypes.c_uint,
+                                     libesm.ac_result_callback,
+                                     ctypes.c_void_p]
+
+def append_result_py(lst_p, res_p):
+    lst = ctypes.cast(lst_p, ctypes.py_object).value
+    start = res_p.contents.start
+    end = res_p.contents.end
+    obj = ctypes.cast(res_p.contents.object, ctypes.py_object).value
+    lst.append(((start, end), obj))
+    return 0
+
+append_result_c = libesm.ac_result_callback(append_result_py)
 
 class Index(object):
     def __init__(self):
@@ -96,22 +96,9 @@ class Index(object):
             raise TypeError
         
         results = []
-        ac_results = libesm.ac_list_new()
-        try:
-            libesm.ac_index_query(self.index, query, len(query), ac_results)
-            i = ac_results.contents.first
-            while i:
-                result = ctypes.cast(i.contents.item,
-                                     ctypes.POINTER(ac_result))
-                
-                start = result.contents.start
-                end = result.contents.end
-                obj = ctypes.cast(result.contents.object, ctypes.py_object).value
-                results.append(((start,end), obj))
-                
-                i = i.contents.next
-            
-            return results
-        
-        finally:
-            libesm.ac_result_list_free(ac_results)
+        libesm.ac_index_query_cb(self.index,
+                                 query,
+                                 len(query),
+                                 append_result_c,
+                                 ctypes.c_void_p(id(results)))
+        return results

@@ -105,9 +105,5 @@ ac_error_code ac_index_fix(ac_index*);
 ac_error_code ac_index_query_cb(ac_index*, ac_symbol*, ac_offset,
                                 ac_result_callback, void*);
 
-// Backwards-compatible operations for index objects.
-ac_error_code ac_index_query(ac_index*, ac_symbol*, ac_offset, ac_list*);
-void ac_result_list_free(ac_list*);
-
 #endif // AHO_CORASICK_H
 

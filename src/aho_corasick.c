@@ -745,36 +745,4 @@ ac_error_code ac_index_query_cb(ac_index* self,
     return AC_SUCCESS;
 }
 
-// --------------------------------------------------------------------------
-// Backwards compatibility
-
-/**
- * Free the result list.
- */
-void
-ac_result_list_free(ac_list* self) {
-    (void) ac_list_free(self, ac_list_free_simple_item, NULL);
-}
-
-/**
- * Query the index with the given phrase of the given size. Matching keyword
- * spans and associated objects are appended as ac_results to the the list in
- * the out argument. This function is an implementation of 'Algorithm 1.
- * Pattern matching machine.' from the paper. Returns AC_SUCCESS if the query
- * was successful (even if there were no matches) or AC_FAILURE if an error
- * was encountered.
- */
-ac_error_code
-ac_index_query(ac_index* self,
-               ac_symbol* phrase,
-               ac_offset size,
-               ac_list* out) {
-    return ac_index_query_cb(self,
-                             phrase,
-                             size,
-                             (ac_result_callback) ac_list_add,
-                             (void*) out);
-}
-
-
 // TODO: Add ac_index_unfix method to unfix the index.

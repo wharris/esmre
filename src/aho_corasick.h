@@ -20,7 +20,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define AHO_CORASICK_H
 
 #include "ac_types.h"
-#include "ac_list.h"
 
 /**
  * Type for symbols used to build strings such as keywords and query phrases.

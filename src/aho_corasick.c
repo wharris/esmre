@@ -45,6 +45,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "aho_corasick.h"
 #include "ac_heap.h"
+#include "ac_list.h"
 #include <stdbool.h>
 
 /**

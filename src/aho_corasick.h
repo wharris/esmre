@@ -19,7 +19,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef AHO_CORASICK_H
 #define AHO_CORASICK_H
 
-#include "ac_types.h"
+typedef enum {
+    AC_SUCCESS = 0,
+    AC_FAILURE = 1
+} ac_error_code;
+
+/**
+ * Type for function pointers used for freeing complex item types.
+ */
+typedef ac_error_code (*ac_free_function)(void* item, void* data);
 
 /**
  * Type for symbols used to build strings such as keywords and query phrases.

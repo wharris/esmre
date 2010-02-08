@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 /*
  * Header for linked list implementation.
  */
-#include "ac_types.h"
+#include "aho_corasick.h"
 
 #ifndef AC_LIST_H
 #define AC_LIST_H

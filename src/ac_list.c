@@ -16,8 +16,8 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include "ac_list.h"
-#include "ac_heap.h"
+#include "libesm/ac_list.h"
+#include "libesm/ac_heap.h"
 
 /**
  * Make a new, empty linked list. Returns a pointer to a list or NULL if an

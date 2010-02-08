@@ -43,9 +43,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  * ac_index_free (not covered in the paper).
  */
 
-#include "aho_corasick.h"
-#include "ac_heap.h"
-#include "ac_list.h"
+#include "libesm/aho_corasick.h"
+#include "libesm/ac_heap.h"
+#include "libesm/ac_list.h"
 #include <stdbool.h>
 
 /**

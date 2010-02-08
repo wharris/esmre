@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <Python.h>
 #include <structmember.h>
 
-#include "aho_corasick.h"
+#include "libesm/aho_corasick.h"
 
 typedef struct {
     PyObject_HEAD

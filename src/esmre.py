@@ -246,7 +246,7 @@ class Index(object):
         try:
             
             if self.fixed:
-                raise TypeError, "enter() cannot be called after query()"
+                raise TypeError("enter() cannot be called after query()")
             
             keywords = shortlist(hints(regex))
             

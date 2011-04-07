@@ -32,7 +32,12 @@ libesm.ac_index_enter.argtypes = [ctypes.c_void_p,
 
 libesm.ac_index_fix.argtypes = [ctypes.c_void_p]
 
-libesm.ac_index_free.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+libesm.ac_free_function = ctypes.CFUNCTYPE(ctypes.c_int,
+                                           ctypes.c_void_p,
+                                           ctypes.c_void_p)
+libesm.ac_list_free_keep_item = ctypes.cast(libesm.ac_list_free_keep_item,
+                                            libesm.ac_free_function)
+libesm.ac_index_free.argtypes = [ctypes.c_void_p, libesm.ac_free_function]
 
 class ac_result(ctypes.Structure):
     _fields_ = [('start', ctypes.c_int),
@@ -59,8 +64,7 @@ def append_result_py(lst_p, res_p):
 
 append_result_c = libesm.ac_result_callback(append_result_py)
 
-
-class ReferenceCounter(object):
+class ListReferenceCounter(object):
     def __init__(self):
         self.retains = []
 
@@ -70,6 +74,26 @@ class ReferenceCounter(object):
     def free_index(self, index):
         libesm.ac_index_free(index.index, libesm.ac_list_free_keep_item)
         self.retains = None
+
+try:
+    import _ctypes
+
+    def free_result_py(item_p, context_p):
+        item = ctypes.cast(item_p, ctypes.py_object).value
+        _ctypes.Py_DECREF(item)
+        return 0
+
+    free_result_c = libesm.ac_free_function(free_result_py)
+
+    class ReferenceCounter(object):
+        def incref(self, obj):
+            _ctypes.Py_INCREF(obj)
+
+        def free_index(self, index):
+            libesm.ac_index_free(index.index, free_result_c)
+            
+except ImportError:
+    ReferenceCounter = ListReferenceCounter
 
 
 class Index(object):

@@ -59,15 +59,27 @@ def append_result_py(lst_p, res_p):
 
 append_result_c = libesm.ac_result_callback(append_result_py)
 
+
+class ReferenceCounter(object):
+    def __init__(self):
+        self.retains = []
+
+    def incref(self, obj):
+        self.retains.append(obj)
+
+    def free_index(self, index):
+        libesm.ac_index_free(index.index, libesm.ac_list_free_keep_item)
+        self.retains = None
+
+
 class Index(object):
     def __init__(self):
         self.index = libesm.ac_index_new()
-        self.retains = []
+        self.reference_counter = ReferenceCounter()
         self.fixed = False
     
     def __del__(self):
-        self.retains = None
-        libesm.ac_index_free(self.index, libesm.ac_list_free_keep_item)
+        self.reference_counter.free_index(self)
     
     def enter(self, keyword, obj=None):
         if self.fixed:
@@ -83,7 +95,7 @@ class Index(object):
                               keyword,
                               len(keyword),
                               ctypes.c_void_p(id(obj)))
-        self.retains.append(obj)
+        self.reference_counter.incref(obj)
     
     def fix(self):
         if self.fixed:

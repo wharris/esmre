@@ -5,3 +5,4 @@ dist
 *.so
 .venv/
 .eggs/
+src/esm.c

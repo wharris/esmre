@@ -17,11 +17,9 @@
 # USA
 
 from setuptools import setup, Extension
+from Cython.Build import cythonize
 
-module1 = Extension("esm",
-                    #define_macros=[("HEAP_CHECK", 1)],
-                    sources = ['src/esm.c'],
-                    libraries = ['esm'])
+module1 = Extension("esm", ['src/esm.pyx'], libraries=['esm'])
                     
 setup (name = "esmre",
        version = '0.5',
@@ -47,7 +45,7 @@ setup (name = "esmre",
        url = 'http://code.google.com/p/esmre/',
        license = 'GNU LGPL',
        platforms = ['POSIX'],
-       ext_modules = [module1],
+       ext_modules = cythonize([module1]),
        package_dir = {'': 'src'},
        py_modules = ["esmre"],
        test_suite = 'nose.collector',

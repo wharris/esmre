@@ -19,11 +19,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <Python.h>
 #include <structmember.h>
 
-#include "libesm/aho_corasick.h"
+#include "esm/aho_corasick.h"
 
 typedef struct {
     PyObject_HEAD
-    ac_index*   index;
+    ac_index    index;
 } esm_IndexObject;
 
 ac_error_code
@@ -65,7 +65,7 @@ esm_Index_enter(esm_IndexObject* self, PyObject* args) {
     int       length;
     PyObject* object = NULL;
     
-    if (self->index->index_state != AC_INDEX_UNFIXED) {
+    if (ac_index_fixed(self->index)) {
         PyErr_SetString(PyExc_TypeError, "Can't call enter after fix");
         return NULL;
     }
@@ -79,7 +79,7 @@ esm_Index_enter(esm_IndexObject* self, PyObject* args) {
     }
         
     if (ac_index_enter(self->index,
-                       (ac_symbol*) keyword,
+                       keyword,
                        (ac_offset) length,
                        (void*) object) != AC_SUCCESS) {
         return PyErr_NoMemory();
@@ -92,7 +92,7 @@ esm_Index_enter(esm_IndexObject* self, PyObject* args) {
 
 static PyObject*
 esm_Index_fix(esm_IndexObject* self) {
-    if (self->index->index_state != AC_INDEX_UNFIXED) {
+    if (ac_index_fixed(self->index)) {
         PyErr_SetString(PyExc_TypeError, "Can't call fix repeatedly");
         return NULL;
     }
@@ -129,7 +129,7 @@ esm_Index_query(esm_IndexObject* self, PyObject* args) {
     int           length = 0;
     PyObject*     result_list = NULL;
     
-    if (self->index->index_state != AC_INDEX_FIXED) {
+    if ( ! ac_index_fixed(self->index)) {
         PyErr_SetString(PyExc_TypeError, "Can't call query before fix");
         return NULL;
     }
@@ -143,7 +143,7 @@ esm_Index_query(esm_IndexObject* self, PyObject* args) {
     }
     
     if (ac_index_query_cb(self->index,
-                          (ac_symbol*) phrase,
+                          phrase,
                           (ac_offset) length,
                           append_result,
                           result_list) != AC_SUCCESS) {

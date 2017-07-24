@@ -49,4 +49,7 @@ setup (name = "esmre",
        platforms = ['POSIX'],
        ext_modules = [module1],
        package_dir = {'': 'src'},
-       py_modules = ["esmre"])
+       py_modules = ["esmre"],
+       test_suite = 'nose.collector',
+       tests_require = 'nose',
+)

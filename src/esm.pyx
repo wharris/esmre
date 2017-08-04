@@ -11,6 +11,12 @@ cdef aho_corasick.ac_error_code append_result(void* data,
     result_list.append(result_tuple)
     return aho_corasick.AC_SUCCESS
 
+cdef text_as_bytes(text):
+    if type(text) is unicode:
+        return text.encode('utf8')
+    else:
+        return text
+
 cdef class Index:
     cdef aho_corasick.ac_index _index
     def __cinit__(self):
@@ -25,6 +31,8 @@ cdef class Index:
     def enter(self, keyword, obj=None):
         if obj is None:
             obj = keyword
+
+        keyword = text_as_bytes(keyword)
 
         if aho_corasick.ac_index_fixed(self._index):
             raise TypeError("Can't call enter after fix")
@@ -45,6 +53,8 @@ cdef class Index:
     def query(self, phrase):
         if not aho_corasick.ac_index_fixed(self._index):
             raise TypeError("Can't call query before fix")
+
+        phrase = text_as_bytes(phrase)
 
         result_list = []
 

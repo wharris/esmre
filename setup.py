@@ -19,15 +19,14 @@
 from setuptools import setup, Extension
 from Cython.Build import cythonize
 
-                    
-setup (name = "esmre",
-       version = '0.5',
-       description = 'Regular expression accelerator',
-       long_description = " ".join("""
 module1 = Extension(
     "esm", ["src/esm.pyx", "src/esm/aho_corasick.c", "src/esm/ac_list.c"]
 )
 
+setup (name = "esmre",
+       version = '0.5',
+       description = 'Regular expression accelerator',
+       long_description = " ".join("""
         Modules used to accelerate execution of a large collection of regular
         expressions using the Aho-Corasick algorithms.
        """.strip().split()),

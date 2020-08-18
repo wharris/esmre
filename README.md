@@ -8,6 +8,7 @@ exclude those expressions which trivially do not match each input.
 
 Here is some example code that uses esmre:
 
+```pycon
 >>> import esmre
 >>> index = esmre.Index()
 >>> index.enter(r"Major-General\W*$", "savoy opera")
@@ -17,6 +18,7 @@ Here is some example code that uses esmre:
 >>> index.query("Way, hay up she rises,")
 ['sea shanty']
 >>> 
+```
 
 The esmre module builds on the simpler string matching facilities of the esm
 module, which wraps a C implementation some of the algorithms described in
@@ -28,6 +30,7 @@ there is enough to implement a quick string matching index.
 
 Here is some example code that uses esm directly:
 
+```pycon
 >>> import esm
 >>> index = esm.Index()
 >>> index.enter("he")
@@ -40,5 +43,6 @@ Here is some example code that uses esm directly:
 >>> index.query("Those are his sheep!")
 [((10, 13), 'his'), ((14, 17), 'she'), ((15, 17), 'he')]
 >>> 
+```
 
 You can see more usage examples in the tests.

@@ -2,3 +2,6 @@ include AUTHORS
 include COPYING
 include INSTALL
 include MANIFEST.in
+include src/esm.pyx
+include src/aho_corasick.pxd
+recursive-include src/esm *

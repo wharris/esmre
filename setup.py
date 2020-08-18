@@ -28,7 +28,7 @@ with open("README.md", "r") as readme:
 
 setup(
     name="esmre",
-    version="0.5",
+    version="0.5.2",
     description="Regular expression accelerator",
     long_description=long_description,
     long_description_content_type="text/markdown",

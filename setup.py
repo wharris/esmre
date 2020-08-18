@@ -31,6 +31,7 @@ setup(
     version="0.5",
     description="Regular expression accelerator",
     long_description=long_description,
+    long_description_content_type="text/markdown",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",

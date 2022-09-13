@@ -28,12 +28,12 @@ with open("README.md", "r") as readme:
 
 setup(
     name="esmre",
-    version="0.5.2",
+    version="1.0",
     description="Regular expression accelerator",
     long_description=long_description,
     long_description_content_type="text/markdown",
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: "
         "GNU Library or Lesser General Public License (LGPL)",

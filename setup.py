@@ -39,6 +39,7 @@ setup(
         "GNU Library or Lesser General Public License (LGPL)",
         "Operating System :: POSIX",
         "Programming Language :: C",
+        "Programming Language :: Cython",
         "Programming Language :: Python",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Text Processing :: Indexing",

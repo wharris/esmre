@@ -47,7 +47,7 @@ setup(
     install_requires=["setuptools"],
     author="Will Harris",
     author_email="esmre@greatlibrary.net",
-    url="http://code.google.com/p/esmre/",
+    url="https://github.com/wharris/esmre",
     license="GNU LGPL",
     platforms=["POSIX"],
     ext_modules=cythonize([module1]),

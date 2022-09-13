@@ -28,17 +28,18 @@ with open("README.md", "r") as readme:
 
 setup(
     name="esmre",
-    version="0.5.2",
+    version="1.0",
     description="Regular expression accelerator",
     long_description=long_description,
     long_description_content_type="text/markdown",
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: "
         "GNU Library or Lesser General Public License (LGPL)",
         "Operating System :: POSIX",
         "Programming Language :: C",
+        "Programming Language :: Cython",
         "Programming Language :: Python",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Text Processing :: Indexing",
@@ -46,7 +47,7 @@ setup(
     install_requires=["setuptools"],
     author="Will Harris",
     author_email="esmre@greatlibrary.net",
-    url="http://code.google.com/p/esmre/",
+    url="https://github.com/wharris/esmre",
     license="GNU LGPL",
     platforms=["POSIX"],
     ext_modules=cythonize([module1]),

@@ -210,8 +210,8 @@ def hints(regex):
     except StopIteration:
         pass
 
-    def flattened(l):
-        for item in l:
+    def flattened(hints):
+        for item in hints:
             if isinstance(item, list):
                 for i in flattened(item):
                     yield i

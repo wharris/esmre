@@ -21,7 +21,6 @@
 
 import unittest
 import esm
-import esmre
 
 
 class IndexTests(unittest.TestCase):

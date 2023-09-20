@@ -53,6 +53,4 @@ setup(
     ext_modules=cythonize([module1]),
     package_dir={"": "src"},
     py_modules=["esmre"],
-    test_suite="nose.collector",
-    tests_require="nose",
 )

@@ -1,11 +1,11 @@
 cimport aho_corasick
 
-cdef aho_corasick.ac_error_code decref_result_object(void *item, void* data):
+cdef aho_corasick.ac_error_code decref_result_object(void *item, void* data) noexcept:
     aho_corasick.Py_DecRef(<object>item)
     return aho_corasick.AC_SUCCESS
 
 cdef aho_corasick.ac_error_code append_result(void* data,
-                                              aho_corasick.ac_result* result):
+                                              aho_corasick.ac_result* result) noexcept:
     result_list = <list>data
     result_tuple = ((result.start, result.end), <object>result.object)
     result_list.append(result_tuple)
